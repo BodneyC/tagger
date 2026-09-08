@@ -1,0 +1,45 @@
+# Copy this to `.tagger.yaml` at the root of the repo you want to tag.
+# Every key here also has a matching CLI flag (see `tagger bump --help`),
+#  and a CLI flag always overrides whatever is set here.
+
+# --- Tag pattern -------------------------------------------------------
+# A template for what a valid version tag looks like. Must contain
+#  {major}, {minor} and {patch} exactly once each; everything else is
+#  literal text (so a literal "." stays a literal "."). Tags that don't
+#  match this shape are ignored when looking for the latest version.
+#
+# Examples you could use instead:
+#   tag_pattern: "{major}.{minor}.{patch}-release"
+#   tag_pattern: "{major}.{minor}.{patch}"
+tag_pattern: "v{major}.{minor}.{patch}"
+
+# --- Commit pattern ------------------------------------------------------
+# A *raw regex* (not a template) applied to each commit's subject line,
+#  with {type}/{scope}/{message} substituted in as named capture groups.
+# The example given matches subjects like:
+#   "JIRA-123: feat(auth): add SSO login"
+#   "JIRA-456: fix: correct off-by-one in pagination"
+# commit_pattern: '[^:]*: {type}(\({scope}\))?: {message}'
+commit_pattern: '{type}(\({scope}\))?: {message}'
+
+# Optional: override the regex fragment used for a given placeholder above.
+# (type/scope/message already have sensible defaults; message defaults to
+# ".*" -- i.e. "the rest of the line".)
+commit_field_patterns:
+  type: "[A-Za-z]+!?" # letters, optionally followed by "!" (breaking change)
+  scope: "[^()]*"
+
+# --- Bump rules ----------------------------------------------------------
+# Which commit `type` values (as matched above) trigger which bump level.
+# A type not listed anywhere here contributes no bump (e.g. chore, docs).
+# A type ending in "!" (e.g. "feat!") always forces a MAJOR bump, regardless
+#  of these lists.
+major_types: ["breaking"]
+minor_types: ["feat"]
+patch_types: ["fix", "perf"]
+
+# If this text appears anywhere in a commit's full message (subject + body),
+#  it forces a MAJOR bump -- this is how conventional-commits-style
+#  "BREAKING CHANGE:" footers are picked up even though the commit_pattern
+#  above only looks at the subject line. Set to "" to disable.
+breaking_change_marker: "BREAKING CHANGE"
